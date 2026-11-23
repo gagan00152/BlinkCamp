@@ -5,6 +5,7 @@ import { InitializeSessionTimer } from "./SessionTimer.js";
 import { SubscribeToNotificationsButtonClick } from "./PushNotifications.js";
 import { InitializeSettings } from "./Settings.js";
 import { InitializeRoutinePicker } from "./RoutinePicker.js";
+import { InitializeShuffle } from "./Shuffle.js";
 import { InitializeZen } from "./Zen.js";
 import { InitializeSound } from "./Sound.js";
 import { InitializeShortcuts } from "./Shortcuts.js";
@@ -19,6 +20,7 @@ const InitializeScene = () => {
     SetRadiusChangeEvent();
     InitializeSettings();
     InitializeRoutinePicker();
+    InitializeShuffle();
     InitializeZen();
     InitializeSound();
     InitializeShortcuts();

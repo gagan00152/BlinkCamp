@@ -18,6 +18,8 @@ let completeOverlay;
 let completeSummary;
 let dotElement;
 export const IsSessionRunning = () => !state.isPaused && !state.isComplete;
+// Session length (0 = Free) and how far into it we are, in seconds of active exercise.
+export const GetSessionInfo = () => ({ presetSeconds: state.presetSeconds, elapsedSeconds: state.elapsedSeconds });
 // Countdowns round up (so 00:00 means the session is over); the Free count-up rounds down.
 const FormatTime = (totalSeconds, roundUp) => {
     const seconds = Math.max(0, roundUp ? Math.ceil(totalSeconds) : Math.floor(totalSeconds));
@@ -57,6 +59,7 @@ const StartSession = (presetSeconds) => {
     state.isPaused = false;
     state.isComplete = false;
     Render();
+    window.dispatchEvent(new CustomEvent("Session:Restarted"));
     if (presetSeconds > 0) {
         window.dispatchEvent(new CustomEvent("Session:Started", { detail: { presetSeconds } }));
     }
@@ -74,6 +77,7 @@ export const StopSession = () => {
     state.isPaused = true;
     state.isComplete = false;
     Render();
+    window.dispatchEvent(new CustomEvent("Session:Restarted"));
 };
 const CompleteSession = () => {
     state.elapsedSeconds = state.presetSeconds;

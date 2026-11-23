@@ -317,7 +317,7 @@ kbd
 
 .routinebutton
 {
-    max-width: 260px;
+    max-width: 340px;
     padding: 0 8px 0 12px;
     color: var(--ui-text);
     font-size: 14px;
@@ -875,6 +875,83 @@ kbd
     .shortcuts
     {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Shuffle status next to the routine name ---------- */
+.shufflestatus
+{
+    flex: none;
+    margin-left: 4px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.shufflestatus[hidden]
+{
+    display: none;
+}
+
+#shuffleintervalnote
+{
+    margin: 4px 0 0 124px;
+    line-height: 1.5;
+}
+
+@media (max-width: 600px)
+{
+    #shuffleintervalnote
+    {
+        margin-left: 0;
+    }
+
+    /* Choices that don't fit beside their label drop onto their own full-width line. */
+    .field
+    {
+        flex-wrap: wrap;
+        row-gap: 6px;
+        padding: 4px 0;
+    }
+
+    .field .segmented
+    {
+        flex: 1 1 100%;
+    }
+
+    .field .segmented button
+    {
+        flex: 1;
+    }
+
+    /* Shuffle status goes on a second line under the routine name. */
+    .routinebutton
+    {
+        flex-wrap: wrap;
+        align-content: center;
+        row-gap: 0;
+    }
+
+    .routinebutton .routinename
+    {
+        max-width: calc(100% - 22px);
+        line-height: 1.25;
+    }
+
+    .routinebutton .icon
+    {
+        order: 2;
+    }
+
+    .shufflestatus
+    {
+        order: 3;
+        flex-basis: 100%;
+        margin-left: 0;
+        line-height: 1.2;
+        text-align: left;
     }
 }
 

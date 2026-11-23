@@ -1,21 +1,13 @@
 // Routine picker: a dropdown menu of every routine, or the original previous/next arrows
-// (chosen in Settings), plus Shuffle mode, which moves to a random routine after each
-// routine's own duration.
+// (chosen in Settings). Shuffle lives in Shuffle.ts.
 import RoutineManager, { SelectRoutine } from "./Dot/DotRoutineManager.js";
-import { IsSessionRunning } from "./SessionTimer.js";
 import { RegisterPopover, ClosePopover, EnableMenuKeyboard } from "./Menus.js";
 const storageKeys = {
     mode: "blinkcamp.pickerMode",
-    shuffle: "blinkcamp.shuffle",
 };
-// A frame longer than this (e.g. after the tab was hidden) doesn't count towards the shuffle timer.
-const maxCountedFrameSeconds = 0.25;
 let mode = "dropdown";
-let shuffle = false;
-let secondsOnRoutine = 0;
 let dock;
 let menu;
-let shuffleButton;
 let modeButtons;
 const Load = (key) => {
     try {
@@ -67,38 +59,9 @@ const ApplyMode = (newMode) => {
         button.setAttribute("aria-pressed", String(selected));
     });
 };
-const ApplyShuffle = (enabled) => {
-    shuffle = enabled;
-    secondsOnRoutine = 0;
-    shuffleButton.setAttribute("aria-pressed", String(shuffle));
-    shuffleButton.title = shuffle
-        ? "Shuffle is on: a new random routine starts after each one finishes"
-        : "Shuffle routines";
-};
-const PickRandomRoutine = () => {
-    const count = RoutineManager.activeDotRoutines.length;
-    if (count < 2) {
-        return;
-    }
-    // Any routine except the current one.
-    const offset = 1 + Math.floor(Math.random() * (count - 1));
-    SelectRoutine((RoutineManager.currentRoutineIndex + offset) % count);
-    window.dispatchEvent(new CustomEvent("Shuffle:RoutineChanged"));
-};
-const ShuffleTick = (dTime) => {
-    if (!shuffle || !IsSessionRunning()) {
-        return;
-    }
-    secondsOnRoutine += Math.min(dTime, maxCountedFrameSeconds);
-    const current = RoutineManager.activeDotRoutines[RoutineManager.currentRoutineIndex];
-    if (secondsOnRoutine >= current.duration) {
-        PickRandomRoutine();
-    }
-};
 export const InitializeRoutinePicker = () => {
     dock = document.querySelector(".dock");
     menu = document.getElementById("routinemenu");
-    shuffleButton = document.getElementById("shufflebutton");
     modeButtons = Array.from(document.querySelectorAll(".pickermode"));
     const routineButton = document.getElementById("routinebutton");
     BuildMenu();
@@ -113,29 +76,16 @@ export const InitializeRoutinePicker = () => {
     });
     document.getElementById("routineprev").addEventListener("click", () => window.dispatchEvent(new CustomEvent("Game:LeftArrowClick")));
     document.getElementById("routinenext").addEventListener("click", () => window.dispatchEvent(new CustomEvent("Game:RightArrowClick")));
-    shuffleButton.addEventListener("click", () => {
-        ApplyShuffle(!shuffle);
-        Save(storageKeys.shuffle, String(shuffle));
-    });
     modeButtons.forEach(button => {
         button.addEventListener("click", () => {
             ApplyMode(button.dataset.mode);
             Save(storageKeys.mode, mode);
         });
     });
-    window.addEventListener("DotRoutineManager:RoutineChanged", () => {
-        secondsOnRoutine = 0;
-        UpdateMenuSelection();
-    });
-    window.addEventListener("GameLoop:Update", (event) => {
-        ShuffleTick(event.detail.dTime);
-    });
+    window.addEventListener("DotRoutineManager:RoutineChanged", UpdateMenuSelection);
     window.addEventListener("Game:ResetSettings", () => {
         ApplyMode("dropdown");
-        ApplyShuffle(false);
         Save(storageKeys.mode, mode);
-        Save(storageKeys.shuffle, "false");
     });
     ApplyMode(Load(storageKeys.mode) === "arrows" ? "arrows" : "dropdown");
-    ApplyShuffle(Load(storageKeys.shuffle) === "true");
 };
